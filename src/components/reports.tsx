@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { inventoryStore } from '@/lib/inventory-store';
+import { supabaseInventoryStore } from '@/lib/supabase-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,19 +9,32 @@ import { format } from 'date-fns';
 
 export function Reports() {
   const { toast } = useToast();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [receipts, setReceipts] = useState<any[]>([]);
+  const [consumptions, setConsumptions] = useState<any[]>([]);
+  const [stockItems, setStockItems] = useState<any[]>([]);
   
-  // Force re-render by refreshing data every few seconds
+  // Load initial data and auto-refresh every 5 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 1000);
+    const loadData = async () => {
+      try {
+        const [receiptsData, consumptionsData, stockItemsData] = await Promise.all([
+          supabaseInventoryStore.getReceipts(),
+          supabaseInventoryStore.getConsumptions(),
+          supabaseInventoryStore.getStockItems()
+        ]);
+        setReceipts(receiptsData);
+        setConsumptions(consumptionsData);
+        setStockItems(stockItemsData);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+
+    loadData();
+    
+    const interval = setInterval(loadData, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  const receipts = inventoryStore.getReceipts();
-  const consumptions = inventoryStore.getConsumptions();
-  const stockItems = inventoryStore.getStockItems();
 
   const downloadCSV = (content: string, filename: string) => {
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
@@ -43,19 +56,31 @@ export function Reports() {
     });
   };
 
-  const handleReceiptDownload = () => {
-    const csv = inventoryStore.exportReceiptsToCSV();
-    downloadCSV(csv, `stock-receipts-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  const handleReceiptDownload = async () => {
+    try {
+      const csv = await supabaseInventoryStore.exportReceiptsToCSV();
+      downloadCSV(csv, `stock-receipts-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    } catch (error) {
+      console.error('Failed to export receipts:', error);
+    }
   };
 
-  const handleConsumptionDownload = () => {
-    const csv = inventoryStore.exportConsumptionsToCSV();
-    downloadCSV(csv, `stock-consumptions-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  const handleConsumptionDownload = async () => {
+    try {
+      const csv = await supabaseInventoryStore.exportConsumptionsToCSV();
+      downloadCSV(csv, `stock-consumptions-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    } catch (error) {
+      console.error('Failed to export consumptions:', error);
+    }
   };
 
-  const handleValuationDownload = () => {
-    const csv = inventoryStore.exportStockValuationToCSV();
-    downloadCSV(csv, `stock-valuation-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  const handleValuationDownload = async () => {
+    try {
+      const csv = await supabaseInventoryStore.exportStockValuationToCSV();
+      downloadCSV(csv, `stock-valuation-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    } catch (error) {
+      console.error('Failed to export stock valuation:', error);
+    }
   };
 
   return (

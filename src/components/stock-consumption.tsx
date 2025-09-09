@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { inventoryStore } from '@/lib/inventory-store';
+import { supabaseInventoryStore } from '@/lib/supabase-store';
 import { ActivityCode } from '@/types/inventory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,7 +59,19 @@ type ConsumptionFormValues = z.infer<typeof consumptionSchema>;
 export function StockConsumption() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const stockItems = inventoryStore.getStockItems();
+  const [stockItems, setStockItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadStockItems = async () => {
+      try {
+        const items = await supabaseInventoryStore.getStockItems();
+        setStockItems(items.filter(item => item.currentQuantity > 0));
+      } catch (error) {
+        console.error('Failed to load stock items:', error);
+      }
+    };
+    loadStockItems();
+  }, []);
 
   const form = useForm<ConsumptionFormValues>({
     resolver: zodResolver(consumptionSchema),
@@ -99,7 +111,7 @@ export function StockConsumption() {
         return;
       }
 
-      const consumption = inventoryStore.addConsumption({
+      const success = await supabaseInventoryStore.addConsumption({
         itemCode: data.itemCode,
         itemName: selectedItem.itemName,
         quantityUsed: data.quantityUsed,
@@ -111,7 +123,7 @@ export function StockConsumption() {
         createdBy: data.usedBy,
       });
 
-      if (consumption) {
+      if (success) {
         toast({
           title: 'Stock Consumption Recorded',
           description: `Successfully consumed ${data.quantityUsed} ${selectedItem.unit} of ${selectedItem.itemName}`,
@@ -119,10 +131,14 @@ export function StockConsumption() {
         });
 
         form.reset();
+        
+        // Refresh stock items after successful consumption
+        const items = await supabaseInventoryStore.getStockItems();
+        setStockItems(items.filter(item => item.currentQuantity > 0));
       } else {
         toast({
           title: 'Error',
-          description: 'Failed to record consumption',
+          description: 'Insufficient stock available',
           variant: 'destructive',
         });
       }

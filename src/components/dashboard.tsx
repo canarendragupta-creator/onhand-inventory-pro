@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { inventoryStore } from '@/lib/inventory-store';
+import { supabaseInventoryStore } from '@/lib/supabase-store';
 import { StatCard } from '@/components/ui/stat-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -11,19 +11,32 @@ import {
 } from 'lucide-react';
 
 export function Dashboard() {
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [stockItems, setStockItems] = useState<any[]>([]);
+  const [receipts, setReceipts] = useState<any[]>([]);
+  const [consumptions, setConsumptions] = useState<any[]>([]);
   
-  // Force re-render by refreshing data every few seconds
+  // Load initial data and auto-refresh every 5 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 1000);
+    const loadData = async () => {
+      try {
+        const [stockItemsData, receiptsData, consumptionsData] = await Promise.all([
+          supabaseInventoryStore.getStockItems(),
+          supabaseInventoryStore.getReceipts(),
+          supabaseInventoryStore.getConsumptions()
+        ]);
+        setStockItems(stockItemsData);
+        setReceipts(receiptsData);
+        setConsumptions(consumptionsData);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+
+    loadData();
+    
+    const interval = setInterval(loadData, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  const stockItems = inventoryStore.getStockItems();
-  const receipts = inventoryStore.getReceipts();
-  const consumptions = inventoryStore.getConsumptions();
 
   const stats = useMemo(() => {
     const totalItems = stockItems.length;

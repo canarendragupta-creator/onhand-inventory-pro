@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react';
-import { inventoryStore } from '@/lib/inventory-store';
+import { supabaseInventoryStore } from '@/lib/supabase-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { History, Plus, Minus, Edit, Trash } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
 export function TransactionLogs() {
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [logs, setLogs] = useState<any[]>([]);
   
-  // Force re-render by refreshing data every few seconds
+  // Load initial data and auto-refresh every 5 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 1000);
+    const loadLogs = async () => {
+      try {
+        const logsData = await supabaseInventoryStore.getLogs();
+        setLogs(logsData);
+      } catch (error) {
+        console.error('Failed to load logs:', error);
+      }
+    };
+
+    loadLogs();
+    
+    const interval = setInterval(loadLogs, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  const logs = inventoryStore.getLogs();
 
   const getActionIcon = (type: string, action: string) => {
     if (type === 'receipt') return <Plus className="h-4 w-4 text-success" />;

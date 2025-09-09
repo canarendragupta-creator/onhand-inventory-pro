@@ -14,7 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      stock_consumptions: {
+        Row: {
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          item_code: string
+          item_name: string
+          purpose_activity_code: string
+          quantity_used: number
+          remarks: string | null
+          unit: string
+          updated_at: string | null
+          updated_by: string | null
+          used_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          date: string
+          id?: string
+          item_code: string
+          item_name: string
+          purpose_activity_code: string
+          quantity_used: number
+          remarks?: string | null
+          unit: string
+          updated_at?: string | null
+          updated_by?: string | null
+          used_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          item_code?: string
+          item_name?: string
+          purpose_activity_code?: string
+          quantity_used?: number
+          remarks?: string | null
+          unit?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          used_by?: string
+        }
+        Relationships: []
+      }
+      stock_items: {
+        Row: {
+          created_at: string
+          current_quantity: number
+          id: string
+          item_code: string
+          item_name: string
+          last_rate: number
+          total_value: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_quantity?: number
+          id?: string
+          item_code: string
+          item_name: string
+          last_rate?: number
+          total_value?: number
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_quantity?: number
+          id?: string
+          item_code?: string
+          item_name?: string
+          last_rate?: number
+          total_value?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stock_receipts: {
+        Row: {
+          created_at: string
+          created_by: string
+          delivery_date: string
+          id: string
+          item_code: string
+          item_name: string
+          quantity_received: number
+          rate_per_unit: number
+          received_by: string
+          supplier_name: string
+          total_value: number
+          unit: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          delivery_date: string
+          id?: string
+          item_code: string
+          item_name: string
+          quantity_received: number
+          rate_per_unit: number
+          received_by: string
+          supplier_name: string
+          total_value: number
+          unit: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          delivery_date?: string
+          id?: string
+          item_code?: string
+          item_name?: string
+          quantity_received?: number
+          rate_per_unit?: number
+          received_by?: string
+          supplier_name?: string
+          total_value?: number
+          unit?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      transaction_logs: {
+        Row: {
+          action: string
+          details: string
+          id: string
+          performed_by: string
+          reference_id: string
+          timestamp: string
+          type: string
+        }
+        Insert: {
+          action: string
+          details: string
+          id?: string
+          performed_by: string
+          reference_id: string
+          timestamp?: string
+          type: string
+        }
+        Update: {
+          action?: string
+          details?: string
+          id?: string
+          performed_by?: string
+          reference_id?: string
+          timestamp?: string
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

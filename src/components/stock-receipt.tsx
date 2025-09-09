@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { inventoryStore } from '@/lib/inventory-store';
+import { supabaseInventoryStore } from '@/lib/supabase-store';
 import { UnitOfMeasurement } from '@/types/inventory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,7 +71,7 @@ export function StockReceipt() {
   const onSubmit = async (data: ReceiptFormValues) => {
     setIsSubmitting(true);
     try {
-      const receipt = inventoryStore.addReceipt({
+      await supabaseInventoryStore.addReceipt({
         itemName: data.itemName,
         itemCode: data.itemCode,
         quantityReceived: data.quantityReceived,
