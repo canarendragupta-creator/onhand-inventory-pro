@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { inventoryStore } from '@/lib/inventory-store';
 import { StatCard } from '@/components/ui/stat-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,16 @@ import {
 } from 'lucide-react';
 
 export function Dashboard() {
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Force re-render by refreshing data every few seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const stockItems = inventoryStore.getStockItems();
   const receipts = inventoryStore.getReceipts();
   const consumptions = inventoryStore.getConsumptions();

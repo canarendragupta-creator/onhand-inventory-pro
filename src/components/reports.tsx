@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { inventoryStore } from '@/lib/inventory-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,16 @@ import { format } from 'date-fns';
 
 export function Reports() {
   const { toast } = useToast();
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Force re-render by refreshing data every few seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const receipts = inventoryStore.getReceipts();
   const consumptions = inventoryStore.getConsumptions();
   const stockItems = inventoryStore.getStockItems();

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { inventoryStore } from '@/lib/inventory-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -5,6 +6,16 @@ import { History, Plus, Minus, Edit, Trash } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
 export function TransactionLogs() {
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Force re-render by refreshing data every few seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const logs = inventoryStore.getLogs();
 
   const getActionIcon = (type: string, action: string) => {
